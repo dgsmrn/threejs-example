@@ -1,11 +1,13 @@
 import * as Three from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export class Game {
   private scene!: Three.Scene;
   private camera!: Three.PerspectiveCamera;
   private renderer!: Three.WebGLRenderer;
   private cameraControls!: OrbitControls;
+  private gltfLoader!: GLTFLoader;
 
   constructor() {
     this.createScene();
@@ -27,9 +29,12 @@ export class Game {
 
   private createScene() {
     this.scene = new Three.Scene();
+    this.scene.background = new Three.Color(0xb4b4b4);
+    // const hemisphereLight = new Three.HemisphereLight(0xffffff, 0xffffff, 0.3);
     const axesHelper = new Three.AxesHelper(5);
     const gridHelper = new Three.GridHelper(10, 10);
-    const light = new Three.DirectionalLight(0xffffff, 1);
+
+    const light = new Three.DirectionalLight(0xffffff, 3);
     light.position.set(-2, 3, 5);
     light.castShadow = true;
     const lightHelper = new Three.DirectionalLightHelper(light, 1);
@@ -38,22 +43,33 @@ export class Game {
 
   private createCamera() {
     this.camera = new Three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(5, 5, 5);
+    this.camera.position.set(0.3, 0.3, 0.3);
     this.camera.lookAt(0, 0, 0);
   }
 
   private createObjects() {
-    const geometry = new Three.BoxGeometry(1, 1, 1);
-    const material = new Three.MeshStandardMaterial({ color: 0x00ff00 });
-    const cube = new Three.Mesh(geometry, material);
-    cube.castShadow = true;
-    cube.position.y = 0.5;
-    const floorGeometry = new Three.PlaneGeometry(10, 10);
+    // const geometry = new Three.BoxGeometry(1, 1, 1);
+    // const material = new Three.MeshStandardMaterial({ color: 0x00ff00 });
+    // const cube = new Three.Mesh(geometry, material);
+    // cube.castShadow = true;
+    // cube.position.y = 0.5;
+    const floorGeometry = new Three.PlaneGeometry(2, 2);
     const floorMaterial = new Three.MeshStandardMaterial({ color: 0xffffff });
     const floor = new Three.Mesh(floorGeometry, floorMaterial);
     floor.receiveShadow = true;
     floor.rotation.x = -Math.PI / 2;
-    this.scene.add(cube, floor);
+    this.gltfLoader = new GLTFLoader();
+    // this.scene.add(cube, floor);
+    this.scene.add(floor);
+    this.gltfLoader.load("/models/donut.glb", (gltf) => {
+      gltf.scene.position.y = 0.02;
+      gltf.scene.traverse((object) => {
+        if (object instanceof Three.Mesh) {
+          object.castShadow = true;
+        }
+      });
+      this.scene.add(gltf.scene);
+    });
   }
 
   private createRenderer() {
