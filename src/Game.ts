@@ -61,13 +61,15 @@ export class Game {
     this.gltfLoader = new GLTFLoader();
     // this.scene.add(cube, floor);
     this.scene.add(floor);
-    this.gltfLoader.load("/models/donut.glb", (gltf) => {
+    this.gltfLoader.load(`${import.meta.env.BASE_URL}models/donut.glb`, (gltf) => {
       gltf.scene.position.y = 0.02;
+
       gltf.scene.traverse((object) => {
         if (object instanceof Three.Mesh) {
           object.castShadow = true;
         }
       });
+
       this.scene.add(gltf.scene);
     });
   }
